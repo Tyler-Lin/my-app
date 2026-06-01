@@ -1,0 +1,113 @@
+<main class="min-h-screen bg-gray-50 py-10 px-4">
+  <div class="max-w-xl mx-auto">
+
+    <header class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-gray-900 tracking-tight">Todos</h1>
+      <p
+        class="mt-2 text-sm text-gray-500"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        @if (todoService.totalCount() === 0) {
+          No todos yet. Add one to get started!
+        } @else {
+          {{ todoService.activeCount() }} of {{ todoService.totalCount() }} remaining
+        }
+      </p>
+    </header>
+
+    <!-- Add form toggle -->
+    <div class="mb-4">
+      @if (showAddForm()) {
+        <app-todo-form
+          (submitted)="onAdd($event)"
+          (cancelled)="showAddForm.set(false)"
+        />
+      } @else {
+        <button
+          type="button"
+          (click)="showAddForm.set(true)"
+          class="w-full py-2 px-4 text-sm text-blue-600 bg-white border-2 border-dashed border-blue-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        >
+          + Add Todo
+        </button>
+      }
+    </div>
+
+    <!-- Actions bar -->
+    @if (todoService.totalCount() > 0) {
+      <div class="flex items-center justify-between mb-3">
+        <button
+          type="button"
+          (click)="todoService.toggleAll()"
+          class="text-xs text-gray-500 hover:text-gray-800 underline focus:outline-none focus:ring-2 focus:ring-gray-400 rounded"
+          [attr.aria-label]="todoService.allCompleted() ? 'Mark all as active' : 'Mark all as complete'"
+        >
+          {{ todoService.allCompleted() ? 'Uncheck all' : 'Check all' }}
+        </button>
+
+        @if (todoService.completedCount() > 0) {
+          <button
+            type="button"
+            (click)="todoService.clearCompleted()"
+            class="text-xs text-red-500 hover:text-red-700 underline focus:outline-none focus:ring-2 focus:ring-red-400 rounded"
+          >
+            Clear completed ({{ todoService.completedCount() }})
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Filter tabs -->
+    <nav aria-label="Filter todos" class="mb-4">
+      <ul role="tablist" class="flex gap-1 p-1 bg-gray-100 rounded-lg">
+        @for (f of filters; track f.value) {
+          <li role="presentation" class="flex-1">
+            <button
+              type="button"
+              role="tab"
+              [attr.aria-selected]="todoService.activeFilter() === f.value"
+              [attr.aria-controls]="'todo-list-panel'"
+              (click)="todoService.setFilter(f.value)"
+              class="w-full py-1.5 text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              [class.bg-white]="todoService.activeFilter() === f.value"
+              [class.font-medium]="todoService.activeFilter() === f.value"
+              [class.text-blue-700]="todoService.activeFilter() === f.value"
+              [class.shadow-sm]="todoService.activeFilter() === f.value"
+              [class.text-gray-500]="todoService.activeFilter() !== f.value"
+            >
+              {{ f.label }}
+            </button>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Todo list -->
+    <section id="todo-list-panel" aria-label="Todo items" role="tabpanel">
+      <ul aria-label="Todo list" class="flex flex-col gap-1">
+        @for (todo of todoService.filteredTodos(); track todo.id) {
+          <li>
+            <app-todo-item
+              [todo]="todo"
+              (toggled)="todoService.toggleTodo($event)"
+              (deleted)="todoService.deleteTodo($event)"
+              (edited)="onEdit($event)"
+            />
+          </li>
+        } @empty {
+          <li class="py-12 text-center text-gray-400 text-sm" role="status">
+            @if (todoService.activeFilter() === 'all') {
+              Nothing here yet.
+            } @else if (todoService.activeFilter() === 'active') {
+              No active todos. Great job!
+            } @else {
+              No completed todos yet.
+            }
+          </li>
+        }
+      </ul>
+    </section>
+
+  </div>
+</main>

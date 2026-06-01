@@ -1,0 +1,104 @@
+name: Issue In-Progress Automation
+
+on:
+  projects_v2_item:
+    types: [edited]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  scaffold:
+    # Only run when a card's Status field moves from "Ready" to "In Progress"
+    if: |
+      github.event.changes.field_value.field_name == 'Status' &&
+      github.event.changes.field_value.to.name == 'In Progress' &&
+      github.event.changes.field_value.from.name == 'Ready'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve linked issue
+        id: issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ITEM_ID="${{ github.event.projects_v2_item.node_id }}"
+
+          RESULT=$(gh api graphql -f query='
+            query($id: ID!) {
+              node(id: $id) {
+                ... on ProjectV2Item {
+                  content {
+                    ... on Issue {
+                      number
+                      title
+                      body
+                    }
+                  }
+                }
+              }
+            }' -F id="$ITEM_ID")
+
+          ISSUE_NUMBER=$(echo "$RESULT" | jq -r '.data.node.content.number')
+          ISSUE_TITLE=$(echo "$RESULT"  | jq -r '.data.node.content.title')
+          ISSUE_BODY=$(echo "$RESULT"   | jq -r '.data.node.content.body')
+
+          if [[ "$ISSUE_NUMBER" == "null" || -z "$ISSUE_NUMBER" ]]; then
+            echo "No linked issue found for this project item. Skipping."
+            exit 0
+          fi
+
+          echo "number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "title=$ISSUE_TITLE"   >> "$GITHUB_OUTPUT"
+          # Write body to a file to avoid quoting issues with multiline content
+          echo "$ISSUE_BODY" > /tmp/issue-body.txt
+
+      - name: Create and push branch
+        id: branch
+        if: steps.issue.outputs.number != ''
+        run: |
+          ISSUE_NUMBER="${{ steps.issue.outputs.number }}"
+          ISSUE_TITLE="${{ steps.issue.outputs.title }}"
+
+          # Slugify: lowercase, replace non-alphanumeric with hyphens, trim
+          SLUG=$(echo "$ISSUE_TITLE" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed 's/[^a-z0-9]/-/g' \
+            | sed 's/--*/-/g' \
+            | cut -c1-50 \
+            | sed 's/-$//')
+
+          BRANCH="feature/${ISSUE_NUMBER}-${SLUG}"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin
+          git checkout main
+          git pull origin main
+          git checkout -b "$BRANCH"
+          git push -u origin "$BRANCH"
+
+      - name: Open draft PR
+        if: steps.branch.outputs.name != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER="${{ steps.issue.outputs.number }}"
+          ISSUE_TITLE="${{ steps.issue.outputs.title }}"
+          BRANCH="${{ steps.branch.outputs.name }}"
+          ISSUE_BODY=$(cat /tmp/issue-body.txt)
+
+          gh pr create \
+            --title "feat: ${ISSUE_TITLE} (#${ISSUE_NUMBER})" \
+            --body "$(printf 'Closes #%s\n\n## Requirements\n\n%s\n\n---\n_Auto-created when issue moved to In Progress._' \
+              "$ISSUE_NUMBER" "$ISSUE_BODY")" \
+            --draft \
+            --base main \
+            --head "$BRANCH"

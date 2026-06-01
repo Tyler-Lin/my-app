@@ -16,7 +16,6 @@ jobs:
       github.event.changes.field_value.to.name == 'In Progress' &&
       github.event.changes.field_value.from.name == 'Ready'
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -25,7 +24,7 @@ jobs:
       - name: Resolve linked issue
         id: issue
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PROJECT_TOKEN }}
         run: |
           ITEM_ID="${{ github.event.projects_v2_item.node_id }}"
 

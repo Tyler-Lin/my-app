@@ -1,6 +1,6 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-3 p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-900 dark:border-gray-700">
   <div class="flex flex-col gap-1">
-    <label for="todo-title" class="text-sm font-medium text-gray-700">
+    <label for="todo-title" class="text-sm font-medium text-gray-700 dark:text-gray-300">
       Title <span aria-hidden="true" class="text-red-500">*</span>
     </label>
     <input
@@ -9,7 +9,7 @@
       formControlName="title"
       placeholder="What needs to be done?"
       autocomplete="off"
-      class="px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
       [class.border-red-400]="form.controls.title.invalid && form.controls.title.touched"
       [class.border-gray-300]="!(form.controls.title.invalid && form.controls.title.touched)"
       [attr.aria-invalid]="form.controls.title.invalid && form.controls.title.touched"
@@ -27,11 +27,11 @@
   </div>
 
   <div class="flex flex-col gap-1">
-    <label for="todo-priority" class="text-sm font-medium text-gray-700">Priority</label>
+    <label for="todo-priority" class="text-sm font-medium text-gray-700 dark:text-gray-300">Priority</label>
     <select
       id="todo-priority"
       formControlName="priority"
-      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
     >
       @for (p of priorities; track p.value) {
         <option [value]="p.value">{{ p.label }}</option>
@@ -43,7 +43,7 @@
     <button
       type="button"
       (click)="onCancel()"
-      class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+      class="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
     >
       Cancel
     </button>

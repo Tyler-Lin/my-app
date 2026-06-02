@@ -122,6 +122,7 @@ export class FeatureService {
 - 衍生狀態用 `computed()`，不要儲存成可寫 signal
 - 更新用 `update(items => [...items, newItem])`，禁用 `mutate()`
 - 副作用（persist、log）放 `effect()`
+- localStorage 一律透過 `readFromStorage` / `writeToStorage`（`shared/utils/local-storage.util.ts`），不直接呼叫 raw API
 
 ---
 
@@ -184,8 +185,9 @@ readonly form = this.fb.nonNullable.group({
 ## 樣式
 
 - Tailwind CSS v4，utility-first
+- Dark mode 用 class 策略，`styles.css` 設定 `@variant dark (&:is(.dark *))`；切換時對 `<html>` 加上 `dark` class
 - 動態 class 用 `computed()` 計算字串，再用 `[class]="computedClass()"` 綁定
-- 單一條件切換用 `[class.active]="condition"`
+- 單一條件切換用 `[class.active]="condition"` 或 `classList.toggle('name', condition)`
 - 不寫 inline `style` 屬性，不用 `ngStyle`
 
 ---
@@ -202,30 +204,35 @@ readonly form = this.fb.nonNullable.group({
 
 ---
 
-## 測試
+## Service 初始化（eager）
+
+需要在 app 啟動時立即執行副作用的 service（例如主題、語言），用 `provideAppInitializer()` 在 `app.config.ts` 顯式初始化，不要靠元件注入來觸發：
 
 ```typescript
-describe('FeatureService', () => {
-  let service: FeatureService;
+// app.config.ts
+import { inject, provideAppInitializer } from '@angular/core';
+import { ThemeService } from './shared/services/theme.service';
 
-  beforeEach(() => {
-    localStorage.clear();
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(FeatureService);
-  });
-
-  it('should ...', () => {
-    service.addItem('Task');
-    TestBed.flushEffects();  // effect() 是非同步，需手動 flush
-    expect(service.items().length).toBe(1);
-  });
-});
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideAppInitializer(() => { inject(ThemeService); }),
+  ]
+};
 ```
 
-- 執行：`npm test`（Vitest via Angular CLI）
-- 元件測試用 `fixture.componentRef.setInput()` 設定 `input()` 值
-- Signal 呼叫加括號：`component.isEditMode()`
-- `effect()` 測試後記得 `TestBed.flushEffects()`
+**不要這樣做（靠元件副作用觸發）：**
+```typescript
+// ✗ 脆弱：theme 欄位被移除後 service 就不再初始化
+export class App {
+  readonly theme = inject(ThemeService);
+}
+```
+
+---
+
+## 測試
+
+此專案不撰寫單元測試，不產生 `.spec.ts` 檔案。
 
 ---
 

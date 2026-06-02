@@ -130,23 +130,29 @@ gh api graphql -f query='
 
 如果 issue 沒有連結到任何 project，跳過步驟 3，繼續往下。
 
-### 5. 建立 feature branch
+### 5. 建立 worktree
 
-把 issue title 轉成 slug（小寫、非英數字換成 `-`、最長 50 字元）：
+把 issue title 轉成 slug（小寫、非英數字換成 `-`、最長 50 字元）。
+Worktree 路徑放在 repo 的**平行目錄**，避免巢狀：
 
 ```bash
 git fetch origin
-git checkout main && git pull origin main
-git checkout -b feature/<number>-<slug>
+
+# WORKTREE_PATH = repo 上層目錄 + /my-app-wt/feature-<number>-<slug>
+# 例如：/Users/tyler/Desktop/workshop/my-app-wt/feature-42-add-todo-filter
+git worktree add <WORKTREE_PATH> -b feature/<number>-<slug> origin/main
 ```
 
-範例：#42 "Add todo filter" → `feature/42-add-todo-filter`
+之後所有檔案操作、指令都在 `<WORKTREE_PATH>` 目錄內執行。
+原本的工作目錄完全不受影響，可以同時有多個 worktree 並行。
 
 ### 6. 實作需求
 
-根據 issue body 實作功能，遵照 `CLAUDE.md` 的規範（Angular 21、signals、OnPush 等）。
+在 worktree 目錄內，根據 issue body 實作功能，遵照 `CLAUDE.md` 的規範（Angular 21、signals、OnPush 等）。
 
 ### 7. Commit 並 push
+
+在 worktree 目錄內執行：
 
 ```bash
 git add -A
@@ -174,11 +180,26 @@ EOF
 
 ### 9. 把 Project card 改成 In Review
 
-重複步驟 3b 的 mutation，`optionId` 改成步驟 3a 取到的 "In Review" option id。
+重複步驟 4 的 mutation，`optionId` 改成 "In Review" 的 option id。
 
-### 10. 完成，回報結果
+### 10. 刪除 worktree
+
+PR 開完、card 更新後，立即清除 worktree，保持環境整潔：
+
+```bash
+# 回到原本的 repo 目錄執行
+git worktree remove <WORKTREE_PATH>
+```
+
+如果 worktree 內有未追蹤的檔案導致 remove 失敗，加 `--force`：
+```bash
+git worktree remove --force <WORKTREE_PATH>
+```
+
+### 11. 完成，回報結果
 
 告訴使用者：
 - ✓ Branch: `feature/<number>-<slug>`
 - ✓ PR: `<pr url>`
 - ✓ Card 狀態: In Review
+- ✓ Worktree 已清除

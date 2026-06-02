@@ -3,6 +3,7 @@ import { TodoService } from '../../services/todo.service';
 import { TodoFilter, TodoPriority } from '../../models/todo.model';
 import { TodoItemComponent } from '../todo-item/todo-item.component';
 import { TodoFormComponent, TodoFormValue } from '../todo-form/todo-form.component';
+import { ThemeService } from '../../../../shared/services/theme.service';
 
 interface FilterOption {
   value: TodoFilter;
@@ -17,6 +18,7 @@ interface FilterOption {
 })
 export class TodoListComponent {
   readonly todoService = inject(TodoService);
+  readonly themeService = inject(ThemeService);
 
   readonly showAddForm = signal(false);
 

@@ -149,6 +149,7 @@ git worktree add <WORKTREE_PATH> -b feature/<number>-<slug> origin/main
 ### 6. 實作需求
 
 在 worktree 目錄內，根據 issue body 實作功能，遵照 `CLAUDE.md` 的規範（Angular 21、signals、OnPush 等）。
+實作前可參考 `docs/guidelines/` 下的設計規範文件（UI_GUIDELINES.md、DESIGN_GUIDELINES.md）。
 
 ### 7. Commit 並 push
 

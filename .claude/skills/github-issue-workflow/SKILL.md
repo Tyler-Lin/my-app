@@ -29,7 +29,45 @@ gh issue view <number> --json number,title,body --repo Tyler-Lin/my-app
 
 仔細閱讀 `title` 和 `body`，這是後續實作的依據。
 
-### 3. 把 Project card 改成 In Progress
+### 3. 評估需求是否明確
+
+讀完 issue 後，判斷需求是否足以直接實作。以下情況屬於「不明確」：
+- body 太短或只有一句話，缺乏實作細節
+- 描述了「要什麼」但沒說「怎麼做」
+- 有歧義，可以有多種解讀方式
+
+**如果需求明確** → 直接繼續步驟 4。
+
+**如果需求不明確** → 先讀 codebase 找相關脈絡：
+- 用 `Glob` 和 `Grep` 找出與需求相關的現有檔案和程式碼
+- 了解目前的實作方式、命名慣例、資料結構
+
+根據讀到的 source code，整理出：
+1. **你的理解**：這個需求最可能的意思是什麼
+2. **建議的實作方向**：基於現有 codebase 的具體做法（例如：在哪個 component、用哪個 service、加什麼欄位）
+3. **還需要確認的問題**：真正無法從 code 推斷的部分才列出來
+
+用以下格式回報，**等使用者確認後才繼續**：
+
+---
+**需求確認**
+
+Issue #N：`<title>`
+
+**我的理解：** `<基於 source code 的解讀>`
+
+**建議實作方向：**
+- `<具體做法 1，附上相關檔案路徑>`
+- `<具體做法 2>`
+
+**還需要你確認：**
+- `<真正不確定的問題>`
+
+請確認方向正確後我再繼續，或告訴我需要調整的地方。
+
+---
+
+### 4. 把 Project card 改成 In Progress
 
 **步驟 3a** — 查詢 project item 和 Status 欄位資訊：
 
@@ -92,7 +130,7 @@ gh api graphql -f query='
 
 如果 issue 沒有連結到任何 project，跳過步驟 3，繼續往下。
 
-### 4. 建立 feature branch
+### 5. 建立 feature branch
 
 把 issue title 轉成 slug（小寫、非英數字換成 `-`、最長 50 字元）：
 
@@ -104,11 +142,11 @@ git checkout -b feature/<number>-<slug>
 
 範例：#42 "Add todo filter" → `feature/42-add-todo-filter`
 
-### 5. 實作需求
+### 6. 實作需求
 
 根據 issue body 實作功能，遵照 `CLAUDE.md` 的規範（Angular 21、signals、OnPush 等）。
 
-### 6. Commit 並 push
+### 7. Commit 並 push
 
 ```bash
 git add -A
@@ -116,7 +154,7 @@ git commit -m "feat: <issue title> (#<number>)"
 git push -u origin feature/<number>-<slug>
 ```
 
-### 7. 開 draft PR
+### 8. 開 draft PR
 
 ```bash
 gh pr create \
@@ -134,11 +172,11 @@ EOF
   --repo Tyler-Lin/my-app
 ```
 
-### 8. 把 Project card 改成 In Review
+### 9. 把 Project card 改成 In Review
 
 重複步驟 3b 的 mutation，`optionId` 改成步驟 3a 取到的 "In Review" option id。
 
-### 9. 完成，回報結果
+### 10. 完成，回報結果
 
 告訴使用者：
 - ✓ Branch: `feature/<number>-<slug>`

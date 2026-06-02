@@ -18,14 +18,16 @@ export class TodoItemComponent {
 
   readonly priorityBadgeClass = computed(() => {
     switch (this.todo().priority) {
-      case 'high':   return 'bg-red-100 text-red-700';
-      case 'medium': return 'bg-yellow-100 text-yellow-700';
-      default:       return 'bg-green-100 text-green-700';
+      case 'high':   return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300';
+      case 'medium': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300';
+      default:       return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300';
     }
   });
 
   readonly titleClass = computed(() =>
-    this.todo().completed ? 'line-through text-gray-400' : 'text-gray-800'
+    this.todo().completed
+      ? 'line-through text-gray-400 dark:text-gray-600'
+      : 'text-gray-800 dark:text-gray-100'
   );
 
   onEditSubmit(value: TodoFormValue): void {

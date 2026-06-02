@@ -5,7 +5,7 @@
     (cancelled)="isEditing.set(false)"
   />
 } @else {
-  <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 group">
+  <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 group">
     <input
       type="checkbox"
       [id]="'todo-' + todo().id"
@@ -31,7 +31,7 @@
       <button
         type="button"
         (click)="isEditing.set(true)"
-        class="p-1 text-gray-400 hover:text-blue-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         [attr.aria-label]="'Edit ' + todo().title"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -41,7 +41,7 @@
       <button
         type="button"
         (click)="deleted.emit(todo().id)"
-        class="p-1 text-gray-400 hover:text-red-600 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+        class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
         [attr.aria-label]="'Delete ' + todo().title"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

@@ -141,6 +141,9 @@ git fetch origin
 # WORKTREE_PATH = repo 上層目錄 + /my-app-wt/feature-<number>-<slug>
 # 例如：/Users/tyler/Desktop/workshop/my-app-wt/feature-42-add-todo-filter
 git worktree add <WORKTREE_PATH> -b feature/<number>-<slug> origin/main
+
+# worktree 不含 node_modules（被 .gitignore），symlink 主 repo 的版本以便 build
+ln -s /Users/tyler/Desktop/workshop/my-app/node_modules <WORKTREE_PATH>/node_modules
 ```
 
 之後所有檔案操作、指令都在 `<WORKTREE_PATH>` 目錄內執行。
@@ -151,7 +154,17 @@ git worktree add <WORKTREE_PATH> -b feature/<number>-<slug> origin/main
 在 worktree 目錄內，根據 issue body 實作功能，遵照 `CLAUDE.md` 的規範（Angular 21、signals、OnPush 等）。
 實作前可參考 `docs/guidelines/` 下的設計規範文件（UI_GUIDELINES.md、DESIGN_GUIDELINES.md）。
 
-### 7. Commit 並 push
+### 7. Build 驗證
+
+commit 前先確認沒有 TypeScript 錯誤：
+
+```bash
+cd <WORKTREE_PATH> && npm run build
+```
+
+build 失敗則修正後再繼續。
+
+### 8. Commit 並 push
 
 在 worktree 目錄內執行：
 
@@ -161,7 +174,7 @@ git commit -m "feat: <issue title> (#<number>)"
 git push -u origin feature/<number>-<slug>
 ```
 
-### 8. 開 draft PR
+### 9. 開 draft PR
 
 ```bash
 gh pr create \
@@ -179,11 +192,11 @@ EOF
   --repo Tyler-Lin/my-app
 ```
 
-### 9. 把 Project card 改成 In Review
+### 10. 把 Project card 改成 In Review
 
 重複步驟 4 的 mutation，`optionId` 改成 "In Review" 的 option id。
 
-### 10. 刪除 worktree
+### 11. 刪除 worktree
 
 PR 開完、card 更新後，立即清除 worktree，保持環境整潔：
 
@@ -197,7 +210,7 @@ git worktree remove <WORKTREE_PATH>
 git worktree remove --force <WORKTREE_PATH>
 ```
 
-### 11. 完成，回報結果
+### 12. 完成，回報結果
 
 告訴使用者：
 - ✓ Branch: `feature/<number>-<slug>`
